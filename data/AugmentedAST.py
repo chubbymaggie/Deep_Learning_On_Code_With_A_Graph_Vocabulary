@@ -6,8 +6,6 @@ import networkx as nx
 import numpy as np
 import scipy as sp
 
-
-
 all_edge_types = frozenset(['AST',
                             'NEXT_TOKEN',
                             'LAST_READ',

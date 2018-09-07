@@ -45,6 +45,7 @@ class BaseInput:
     '''
     Base class for all objects that models take as input.  (Along with a label, this is what a Batch instance contains.)
     '''
+
     def unpack(self) -> List:
         raise NotImplementedError
 
