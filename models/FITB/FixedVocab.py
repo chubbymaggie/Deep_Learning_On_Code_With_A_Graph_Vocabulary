@@ -136,22 +136,12 @@ class FITBFixedVocab(FITBModel):
         self.type_emb_size = kwargs['type_emb_size']
         self.name_emb_size = kwargs['name_emb_size']
 
-        # Initializing input and readout model components
+        # Initializing input model components
         with self.name_scope():
             self.type_embedding = gluon.nn.Embedding(len(self.data_encoder.all_node_types), self.type_emb_size)
             self.name_embedding = gluon.nn.Embedding(len(self.data_encoder.all_node_name_subtokens), self.name_emb_size)
             self.node_init = gluon.nn.Dense(self.hidden_size, in_units=self.type_emb_size + self.name_emb_size)
 
-            self.readout_1 = gluon.nn.HybridSequential()
-            with self.readout_1.name_scope():
-                self.readout_1.add(
-                    gluon.nn.Dense(self.hidden_size * 2, activation='tanh', in_units=self.hidden_size * 2))
-                self.readout_1.add(gluon.nn.Dense(self.hidden_size, in_units=self.hidden_size * 2))
-            self.readout_2 = gluon.nn.HybridSequential()
-            with self.readout_2.name_scope():
-                self.readout_2.add(gluon.nn.Dense(self.hidden_size, activation='tanh', in_units=self.hidden_size))
-                self.readout_2.add(gluon.nn.Dense(self.hidden_size, in_units=self.hidden_size))
-            self.readout_final = gluon.nn.Dense(1, in_units=self.hidden_size)
 
     def batchify(self, data_filepaths: List[str], ctx: mx.context.Context):
         data = [self.data_encoder.load_datapoint(i) for i in data_filepaths]

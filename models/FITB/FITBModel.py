@@ -32,13 +32,6 @@ class FITBModel(Model):
         assert type(task) == FITBTask
         super().preprocess_task(task, *args, **kwargs)
 
-    def readout(self, F, hidden_states):
-        readout_in_1 = F.concat(hidden_states, self.init_hidden_states, dim=1)
-        readout_hid_1 = F.sigmoid(self.readout_1(readout_in_1))
-        readout_hid_2 = self.readout_2(hidden_states)
-        readout_hid = readout_hid_1 * readout_hid_2
-        return self.readout_final(readout_hid)
-
     def unbatchify(self, batch, model_output):
         predictions_labels = []
         length = 0
