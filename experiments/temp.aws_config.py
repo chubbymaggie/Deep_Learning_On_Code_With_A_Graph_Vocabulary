@@ -1,6 +1,7 @@
 # Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 aws_config = dict(
     s3_bucket_addr='s3://...',
+    s3_config_profile_name='',
     local_config_profile_name='',
     remote_config_profile_name='',
     remote_project_root='',

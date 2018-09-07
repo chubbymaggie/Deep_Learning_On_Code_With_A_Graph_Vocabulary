@@ -274,7 +274,7 @@ def s3_sync(source_path: str, target_path: str):
     '''
     Syncs the directory/file at source_path to target_path via the aws s3 CLI
     '''
-    cmd = "aws s3 sync {} {} --profile {}".format(source_path, target_path, aws_config['local_config_profile_name'])
+    cmd = "aws s3 sync {} {} --profile {}".format(source_path, target_path, aws_config['s3_config_profile_name'])
     logger.info('Running: {}'.format(cmd))
     subprocess.run(cmd, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy())
 
@@ -288,6 +288,6 @@ def s3_cp(source_path: str, target_path: str, recursive=False):
     else:
         recursive = ''
     cmd = "aws s3 cp {} {} {} --profile {}".format(recursive, source_path, target_path,
-                                                   aws_config['local_config_profile_name'])
+                                                   aws_config['s3_config_profile_name'])
     logger.info('Running: {}'.format(cmd))
     subprocess.run(cmd, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy())
