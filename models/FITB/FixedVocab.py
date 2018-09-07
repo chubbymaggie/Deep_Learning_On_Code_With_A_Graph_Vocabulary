@@ -142,7 +142,6 @@ class FITBFixedVocab(FITBModel):
             self.name_embedding = gluon.nn.Embedding(len(self.data_encoder.all_node_name_subtokens), self.name_emb_size)
             self.node_init = gluon.nn.Dense(self.hidden_size, in_units=self.type_emb_size + self.name_emb_size)
 
-
     def batchify(self, data_filepaths: List[str], ctx: mx.context.Context):
         data = [self.data_encoder.load_datapoint(i) for i in data_filepaths]
 

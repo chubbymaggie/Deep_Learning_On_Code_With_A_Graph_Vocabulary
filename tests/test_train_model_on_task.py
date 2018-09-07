@@ -7,8 +7,7 @@ import unittest
 from data import FITBTask, VarNamingTask
 from experiments.utils import get_time
 from models.all_models import FITBFixedVocab, FITBCharCNN, VarNamingFixedVocabGGNN, FITBNameGraphVocab, \
-    VarNamingFixedVocab, \
-    VarNamingCharCNNGGNN, VarNamingNameGraphVocabGGNN
+    VarNamingFixedVocab, VarNamingCharCNNGGNN, VarNamingNameGraphVocabGGNN, FITBFixedVocabGGNN, FITBFixedVocabDTNN
 from preprocess_task_for_model import preprocess_task_for_model
 from tests import test_s3shared_path
 from train_model_on_task import train
@@ -204,7 +203,114 @@ class TestTrainModelOnVarNamingTask(unittest.TestCase):
               debug=True)
 
 
-class TestTrainModelOnTaskMemorizeMinibatch(unittest.TestCase):
+class TestTrainModelOnFITBTaskMemorizeMinibatch(unittest.TestCase):
+    def setUp(self):
+        self.gml_dir = os.path.join(test_s3shared_path, 'test_dataset', 'repositories')
+        self.output_dataset_dir = os.path.join(test_s3shared_path, 'FITB_minibatch_memorize_test_dataset')
+        self.log_dir = os.path.join(test_s3shared_path, 'test_logs', get_time())
+        os.makedirs(self.output_dataset_dir, exist_ok=True)
+        self.test_gml_files = []
+        self.n_graphs_for_minibatch = 5
+        self.minibatch_size = 20
+        for file in os.listdir(self.gml_dir)[:self.n_graphs_for_minibatch]:
+            if file[-4:] == '.gml':
+                self.test_gml_files.append(os.path.abspath(os.path.join(self.gml_dir, file)))
+
+        task = FITBTask.from_gml_files(self.test_gml_files)
+        self.task_filepath = os.path.join(self.gml_dir, 'FITBTask.pkl')
+        task.save(self.task_filepath)
+
+    def tearDown(self):
+        for dir in [self.log_dir, self.output_dataset_dir]:
+            try:
+                shutil.rmtree(dir)
+            except FileNotFoundError:
+                pass
+
+    def test_train_model_on_task_memorize_minibatch_with_FITBFixedVocabGGNN(self):
+        preprocess_task_for_model(234,
+                                  'FITBTask',
+                                  self.task_filepath,
+                                  'FITBFixedVocabGGNN',
+                                  dataset_output_dir=self.output_dataset_dir,
+                                  n_jobs=30,
+                                  excluded_edge_types=frozenset(),
+                                  data_encoder='new',
+                                  data_encoder_kwargs=dict(),
+                                  instance_to_datapoints_kwargs=dict(max_nodes_per_graph=100))
+        for f in [os.path.join(self.output_dataset_dir, f) for f in os.listdir(self.output_dataset_dir) if
+                  'DataEncoder' not in f][self.minibatch_size:]:
+            os.remove(f)
+        _, accuracy = train(seed=1525,
+                            log_dir=self.log_dir,
+                            gpu_ids=(0, 1),
+                            model_name='FITBFixedVocabGGNN',
+                            data_encoder_filepath=os.path.join(self.output_dataset_dir,
+                                                               '{}.pkl'.format(
+                                                                   FITBFixedVocabGGNN.DataEncoder.__name__)),
+                            model_kwargs=dict(hidden_size=128,
+                                              type_emb_size=30,
+                                              name_emb_size=30,
+                                              n_msg_pass_iters=3,
+                                              max_name_length=8),
+                            init_fxn_name='Xavier',
+                            init_fxn_kwargs=dict(),
+                            loss_fxn_name='FITBLoss',
+                            loss_fxn_kwargs=dict(),
+                            optimizer_name='Adam',
+                            optimizer_kwargs={'learning_rate': .001},
+                            train_data_directory=self.output_dataset_dir,
+                            val_fraction=0.15,
+                            n_workers=4,
+                            n_epochs=7,
+                            evaluation_metrics=('evaluate_FITB_accuracy',),
+                            n_batch=(len(os.listdir(self.output_dataset_dir)) - 1) * 10,
+                            test=True)
+        self.assertGreaterEqual(accuracy, 0.8)
+
+    def test_train_model_on_task_memorize_minibatch_with_FITBFixedVocabDTNN(self):
+        preprocess_task_for_model(234,
+                                  'FITBTask',
+                                  self.task_filepath,
+                                  'FITBFixedVocabDTNN',
+                                  dataset_output_dir=self.output_dataset_dir,
+                                  n_jobs=30,
+                                  excluded_edge_types=frozenset(),
+                                  data_encoder='new',
+                                  data_encoder_kwargs=dict(),
+                                  instance_to_datapoints_kwargs=dict(max_nodes_per_graph=100))
+        for f in [os.path.join(self.output_dataset_dir, f) for f in os.listdir(self.output_dataset_dir) if
+                  'DataEncoder' not in f][self.minibatch_size:]:
+            os.remove(f)
+        _, accuracy = train(seed=1525,
+                            log_dir=self.log_dir,
+                            gpu_ids=(0, 1),
+                            model_name='FITBFixedVocabDTNN',
+                            data_encoder_filepath=os.path.join(self.output_dataset_dir,
+                                                               '{}.pkl'.format(
+                                                                   FITBFixedVocabDTNN.DataEncoder.__name__)),
+                            model_kwargs=dict(hidden_size=128,
+                                              type_emb_size=30,
+                                              name_emb_size=30,
+                                              n_msg_pass_iters=3,
+                                              max_name_length=8),
+                            init_fxn_name='Xavier',
+                            init_fxn_kwargs=dict(),
+                            loss_fxn_name='FITBLoss',
+                            loss_fxn_kwargs=dict(),
+                            optimizer_name='Adam',
+                            optimizer_kwargs={'learning_rate': .003},
+                            train_data_directory=self.output_dataset_dir,
+                            val_fraction=0.15,
+                            n_workers=4,
+                            n_epochs=7,
+                            evaluation_metrics=('evaluate_FITB_accuracy',),
+                            n_batch=(len(os.listdir(self.output_dataset_dir)) - 1) * 10,
+                            test=True)
+        self.assertGreaterEqual(accuracy, 0.8)
+
+
+class TestTrainModelOnVarNamingTaskMemorizeMinibatch(unittest.TestCase):
     def setUp(self):
         self.gml_dir = os.path.join(test_s3shared_path, 'test_dataset', 'repositories')
         self.output_dataset_dir = os.path.join(test_s3shared_path, 'VarNaming_minibatch_memorize_test_dataset')
