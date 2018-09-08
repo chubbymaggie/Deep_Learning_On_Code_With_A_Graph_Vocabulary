@@ -7,6 +7,9 @@ from models.GraphNN.MPNN import MPNN
 
 
 class DTNN(MPNN):
+    '''
+    Deep Tensor Neural Network from https://www.nature.com/articles/ncomms13890
+    '''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.hidden_size = kwargs['hidden_size']

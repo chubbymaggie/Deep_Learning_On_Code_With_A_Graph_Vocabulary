@@ -7,6 +7,9 @@ from models.GraphNN.MPNN import MPNN
 
 
 class GGNN(MPNN):
+    '''
+    Gated Graph Neural Network from https://arxiv.org/abs/1511.05493
+    '''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.hidden_size = kwargs['hidden_size']

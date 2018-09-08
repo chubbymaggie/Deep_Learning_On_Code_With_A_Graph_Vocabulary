@@ -26,6 +26,11 @@ def run_command_on_remote(ec2_instance_id: str,
                                      "tmux -S /tmp/socket send-keys -t {} 'sudo su ubuntu -l' C-m".format(session_name),
                                      "tmux -S /tmp/socket send-keys -t {} 'cd {}' C-m".format(session_name, aws_config[
                                          'remote_project_root']),
+                                     "tmux -S /tmp/socket send-keys -t {} 'eval $(ssh-agent -s)' C-m".format(
+                                         session_name),
+                                     "tmux -S /tmp/socket send-keys -t {} 'ssh-add {}' C-m".format(session_name,
+                                                                                                   aws_config[
+                                                                                                       'git_ssh_key_loc']),
                                      "tmux -S /tmp/socket send-keys -t {} 'git pull' C-m".format(session_name),
                                      "tmux -S /tmp/socket send-keys -t {} '{}' C-m".format(session_name, ' '.join(
                                          ['export {}={}; '.format(k, v) for k, v in
