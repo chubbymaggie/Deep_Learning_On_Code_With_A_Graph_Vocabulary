@@ -6,7 +6,9 @@ dependencies:
   - blas=1.1
   - bleach=2.0.0
   - bzip2=1.0.6
+  - ca-certificates=2018.4.16
   - cairo=1.14.6
+  - certifi=2018.4.16
   - dbus=1.10.22
   - decorator=4.1.2
   - entrypoints=0.2.3
@@ -48,6 +50,7 @@ dependencies:
   - numpy=1.14.1
   - openblas=0.2.20
   - opencv=3.3.0
+  - openssl=1.0.2o
   - pandoc=2.1.1
   - pandocfilters=1.4.1
   - pango=1.40.3
@@ -61,6 +64,7 @@ dependencies:
   - python-dateutil=2.6.1
   - pyzmq=17.0.0
   - qt=5.6.2
+  - scikit-learn=0.19.1
   - scipy=1.0.1
   - send2trash=1.5.0
   - simplegeneric=0.8.1
@@ -72,18 +76,20 @@ dependencies:
   - wcwidth=0.1.7
   - webencodings=0.5
   - x264=20131217
+  - yappi=0.98
   - zeromq=4.2.3
   - asn1crypto=0.24.0
+  - attrs=18.1.0
   - autovizwidget=0.12.5
   - bokeh=0.12.14
-  - ca-certificates=2018.03.07
-  - certifi=2018.1.18
   - cffi=1.11.4
   - chardet=3.0.4
+  - coverage=4.5.1
   - cryptography=2.1.4
   - expat=2.2.5
   - graphite2=1.3.10
   - hdijupyterutils=0.12.5
+  - hypothesis=3.56.0
   - icu=58.2
   - idna=2.6
   - intel-openmp=2018.0.0
@@ -105,7 +111,6 @@ dependencies:
   - ncurses=6.0
   - networkx=2.1
   - openjdk=8.0.121
-  - openssl=1.0.2o
   - packaging=16.8
   - pandas=0.22.0
   - pcre=8.41
@@ -123,7 +128,6 @@ dependencies:
   - readline=7.0
   - requests=2.18.4
   - requests-kerberos=0.11.0
-  - scikit-learn=0.19.1
   - setuptools=38.5.1
   - sparkmagic=0.12.5
   - sqlite=3.22.0
@@ -149,7 +153,7 @@ dependencies:
     - jmespath==0.9.3
     - keras-mxnet==1.2.2
     - matplotlib==2.1.2
-    - mxnet-cu90mkl==1.3.0b20180701
+    - mxnet-cu90mkl==1.3.0b20180822
     - mxnet-model-server==0.1.5
     - pillow==5.0.0
     - psutil==5.4.3
