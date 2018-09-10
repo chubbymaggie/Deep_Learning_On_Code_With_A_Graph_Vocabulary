@@ -255,8 +255,7 @@ class TestTrainModelOnFITBTaskMemorizeMinibatch(unittest.TestCase):
                             model_kwargs=dict(hidden_size=128,
                                               type_emb_size=30,
                                               name_emb_size=30,
-                                              n_msg_pass_iters=3,
-                                              max_name_length=8),
+                                              n_msg_pass_iters=3),
                             init_fxn_name='Xavier',
                             init_fxn_kwargs=dict(),
                             loss_fxn_name='FITBLoss',
@@ -296,8 +295,7 @@ class TestTrainModelOnFITBTaskMemorizeMinibatch(unittest.TestCase):
                             model_kwargs=dict(hidden_size=128,
                                               type_emb_size=30,
                                               name_emb_size=30,
-                                              n_msg_pass_iters=3,
-                                              max_name_length=8),
+                                              n_msg_pass_iters=3),
                             init_fxn_name='Xavier',
                             init_fxn_kwargs=dict(),
                             loss_fxn_name='FITBLoss',
@@ -337,8 +335,7 @@ class TestTrainModelOnFITBTaskMemorizeMinibatch(unittest.TestCase):
                             model_kwargs=dict(hidden_size=128,
                                               type_emb_size=30,
                                               name_emb_size=30,
-                                              n_msg_pass_iters=3,
-                                              max_name_length=8),
+                                              n_msg_pass_iters=3),
                             init_fxn_name='Xavier',
                             init_fxn_kwargs=dict(),
                             loss_fxn_name='FITBLoss',
@@ -354,47 +351,46 @@ class TestTrainModelOnFITBTaskMemorizeMinibatch(unittest.TestCase):
                             test=True)
         self.assertGreaterEqual(accuracy, 0.8)
 
-    # def test_train_model_on_task_memorize_minibatch_with_FITBFixedVocabGAT(self):
-    #     preprocess_task_for_model(234,
-    #                               'FITBTask',
-    #                               self.task_filepath,
-    #                               'FITBFixedVocabGAT',
-    #                               dataset_output_dir=self.output_dataset_dir,
-    #                               n_jobs=30,
-    #                               excluded_edge_types=frozenset(),
-    #                               data_encoder='new',
-    #                               data_encoder_kwargs=dict(),
-    #                               instance_to_datapoints_kwargs=dict(max_nodes_per_graph=100))
-    #     for f in [os.path.join(self.output_dataset_dir, f) for f in os.listdir(self.output_dataset_dir) if
-    #               'DataEncoder' not in f][self.minibatch_size:]:
-    #         os.remove(f)
-    #     _, accuracy = train(seed=1525,
-    #                         log_dir=self.log_dir,
-    #                         gpu_ids=(0, 1),
-    #                         model_name='FITBFixedVocabGAT',
-    #                         data_encoder_filepath=os.path.join(self.output_dataset_dir,
-    #                                                            '{}.pkl'.format(
-    #                                                                FITBFixedVocabGAT.DataEncoder.__name__)),
-    #                         model_kwargs=dict(hidden_size=128,
-    #                                           n_multi_attention_heads=2,
-    #                                           type_emb_size=30,
-    #                                           name_emb_size=30,
-    #                                           n_msg_pass_iters=3,
-    #                                           max_name_length=8),
-    #                         init_fxn_name='Xavier',
-    #                         init_fxn_kwargs=dict(),
-    #                         loss_fxn_name='FITBLoss',
-    #                         loss_fxn_kwargs=dict(),
-    #                         optimizer_name='Adam',
-    #                         optimizer_kwargs={'learning_rate': .003},
-    #                         train_data_directory=self.output_dataset_dir,
-    #                         val_fraction=0.15,
-    #                         n_workers=4,
-    #                         n_epochs=7,
-    #                         evaluation_metrics=('evaluate_FITB_accuracy',),
-    #                         n_batch=(len(os.listdir(self.output_dataset_dir)) - 1) * 10,
-    #                         test=True)
-    #     self.assertGreaterEqual(accuracy, 0.8)
+    def test_train_model_on_task_memorize_minibatch_with_FITBFixedVocabGAT(self):
+        preprocess_task_for_model(234,
+                                  'FITBTask',
+                                  self.task_filepath,
+                                  'FITBFixedVocabGAT',
+                                  dataset_output_dir=self.output_dataset_dir,
+                                  n_jobs=30,
+                                  excluded_edge_types=frozenset(),
+                                  data_encoder='new',
+                                  data_encoder_kwargs=dict(),
+                                  instance_to_datapoints_kwargs=dict(max_nodes_per_graph=100))
+        for f in [os.path.join(self.output_dataset_dir, f) for f in os.listdir(self.output_dataset_dir) if
+                  'DataEncoder' not in f][self.minibatch_size:]:
+            os.remove(f)
+        _, accuracy = train(seed=1525,
+                            log_dir=self.log_dir,
+                            gpu_ids=(0, 1),
+                            model_name='FITBFixedVocabGAT',
+                            data_encoder_filepath=os.path.join(self.output_dataset_dir,
+                                                               '{}.pkl'.format(
+                                                                   FITBFixedVocabGAT.DataEncoder.__name__)),
+                            model_kwargs=dict(hidden_size=128,
+                                              n_multi_attention_heads=2,
+                                              type_emb_size=30,
+                                              name_emb_size=30,
+                                              n_msg_pass_iters=2),
+                            init_fxn_name='Xavier',
+                            init_fxn_kwargs=dict(),
+                            loss_fxn_name='FITBLoss',
+                            loss_fxn_kwargs=dict(),
+                            optimizer_name='Adam',
+                            optimizer_kwargs={'learning_rate': .00075},
+                            train_data_directory=self.output_dataset_dir,
+                            val_fraction=0.15,
+                            n_workers=4,
+                            n_epochs=8,
+                            evaluation_metrics=('evaluate_FITB_accuracy',),
+                            n_batch=(len(os.listdir(self.output_dataset_dir)) - 1) * 10,
+                            test=True)
+        self.assertGreaterEqual(accuracy, 0.7)
 
 
 class TestTrainModelOnVarNamingTaskMemorizeMinibatch(unittest.TestCase):

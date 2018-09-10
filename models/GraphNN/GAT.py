@@ -1,17 +1,17 @@
 # Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 from collections import OrderedDict
 
+import scipy as sp
 from mxnet import gluon
 
+from models.FITB.FITBModel import FITBModel
 from models.GraphNN.MPNN import MPNN
 
 
 class GAT(MPNN):
     '''
-    NOTE: This model is not yet generally useable - waiting for more sparse ops in mxnet
-
     Graph Attention Network from https://arxiv.org/pdf/1710.10903.pdf, but modified to have a different attention function per edge type
-    (Averages the outputs of the multi-attention heads, and uses the DTNN readout function)
+    (Averages the outputs of the multi-attention heads, uses relu instead of leakyrelu, and uses the DTNN readout function)
     '''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -32,30 +32,31 @@ class GAT(MPNN):
                     heads.append((left_attn, right_attn))
                 self.attn_fxns[t] = heads
 
-
-            self.readout_mlp = gluon.nn.HybridSequential()
-            with self.readout_mlp.name_scope():
-                self.readout_mlp.add(gluon.nn.Dense(self.hidden_size, activation='tanh', in_units=self.hidden_size))
-                self.readout_mlp.add(gluon.nn.Dense(1, in_units=self.hidden_size))
+            if FITBModel in self.__class__.mro():
+                self.readout_mlp = gluon.nn.HybridSequential()
+                with self.readout_mlp.name_scope():
+                    self.readout_mlp.add(gluon.nn.Dense(self.hidden_size, activation='tanh', in_units=self.hidden_size))
+                    self.readout_mlp.add(gluon.nn.Dense(1, in_units=self.hidden_size))
 
     def compute_messages(self, F, hidden_states, edges, t):
         hidden_states = self.pre_attn_mapping(hidden_states)
         summed_msgs = []
         for key in self.attn_fxns.keys():
             adj_mat, heads = edges[key], self.attn_fxns[key]
+            # Adding self-edges for numerical stability
+            adj_mat = adj_mat + F.sparse.csr_matrix(sp.sparse.eye(*adj_mat.shape, dtype='float32', format='csr'), ctx=adj_mat.context)
             to_average = []
             for left_attn, right_attn, in heads:
                 # Compute a^T[ Wh_i || Wh_j ] from the paper cited in the docstring by summing two sparse matrices,
                 #    one containing a^T[ Wh_i ] and one containing a^T[ Wh_j ]
                 left_pre_attn = left_attn(hidden_states) # n_vertices X 1
                 right_pre_attn = right_attn(hidden_states) # n_vertices X 1
-                # The right way to do this is staying with sparse matrices, but mxnet doesn't support all the ops yet
                 # Broadcasting is done axis-aligned, so here we're broadcasting across rows with left_pre_attn
-                pre_attns = left_pre_attn.T * adj_mat + adj_mat * right_pre_attn # n_vertices x n_vertices
+                pre_attns = adj_mat * left_pre_attn + adj_mat * right_pre_attn.T
                 # Do the rest of the pre_attn operations on a^T[ Wh_i || Wh_j ]
-                pre_attns = F.LeakyReLU(pre_attns, act_type='leaky', slope=0.2)
-                pre_attns = F.exp(pre_attns)
-                attns = pre_attns / F.sum(pre_attns, axis=1, keepdims=True)
+                pre_attns = F.sparse.relu(pre_attns)
+                pre_attns = F.sparse.expm1(pre_attns) + adj_mat # +adj_mat to compensate for the minus 1 in expm1
+                attns = pre_attns / F.sparse.sum(pre_attns, axis=1, keepdims=True)
                 # Compute attention-weighted sum of all neighbor representations (for this edge type)
                 to_average.append(F.dot(attns, hidden_states))
             avg = F.mean(F.stack(*to_average), axis=0)

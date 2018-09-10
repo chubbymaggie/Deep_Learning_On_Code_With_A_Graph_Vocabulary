@@ -3,6 +3,7 @@ from collections import OrderedDict
 
 from mxnet import gluon
 
+from models.FITB.FITBModel import FITBModel
 from models.GraphNN.MPNN import MPNN
 
 
@@ -24,10 +25,11 @@ class RGCN(MPNN):
                 self.message_fxns[t] = layer
             self.self_loop_dense = gluon.nn.Dense(self.hidden_size, in_units=self.hidden_size)
 
-            self.readout_mlp = gluon.nn.HybridSequential()
-            with self.readout_mlp.name_scope():
-                self.readout_mlp.add(gluon.nn.Dense(self.hidden_size, activation='tanh', in_units=self.hidden_size))
-                self.readout_mlp.add(gluon.nn.Dense(1, in_units=self.hidden_size))
+            if FITBModel in self.__class__.mro():
+                self.readout_mlp = gluon.nn.HybridSequential()
+                with self.readout_mlp.name_scope():
+                    self.readout_mlp.add(gluon.nn.Dense(self.hidden_size, activation='tanh', in_units=self.hidden_size))
+                    self.readout_mlp.add(gluon.nn.Dense(1, in_units=self.hidden_size))
 
     def compute_messages(self, F, hidden_states, edges, t):
         summed_msgs = []

@@ -3,6 +3,7 @@ from collections import OrderedDict
 
 from mxnet import gluon
 
+from models.FITB.FITBModel import FITBModel
 from models.GraphNN.MPNN import MPNN
 
 
@@ -23,16 +24,17 @@ class GGNN(MPNN):
                 self.message_fxns[t] = layer
             self.hidden_gru = gluon.rnn.GRUCell(self.hidden_size, input_size=self.hidden_size)
 
-            self.readout_1 = gluon.nn.HybridSequential()
-            with self.readout_1.name_scope():
-                self.readout_1.add(
-                    gluon.nn.Dense(self.hidden_size * 2, activation='tanh', in_units=self.hidden_size * 2))
-                self.readout_1.add(gluon.nn.Dense(self.hidden_size, in_units=self.hidden_size * 2))
-            self.readout_2 = gluon.nn.HybridSequential()
-            with self.readout_2.name_scope():
-                self.readout_2.add(gluon.nn.Dense(self.hidden_size, activation='tanh', in_units=self.hidden_size))
-                self.readout_2.add(gluon.nn.Dense(self.hidden_size, in_units=self.hidden_size))
-            self.readout_final = gluon.nn.Dense(1, in_units=self.hidden_size)
+            if FITBModel in self.__class__.mro():
+                self.readout_1 = gluon.nn.HybridSequential()
+                with self.readout_1.name_scope():
+                    self.readout_1.add(
+                        gluon.nn.Dense(self.hidden_size * 2, activation='tanh', in_units=self.hidden_size * 2))
+                    self.readout_1.add(gluon.nn.Dense(self.hidden_size, in_units=self.hidden_size * 2))
+                self.readout_2 = gluon.nn.HybridSequential()
+                with self.readout_2.name_scope():
+                    self.readout_2.add(gluon.nn.Dense(self.hidden_size, activation='tanh', in_units=self.hidden_size))
+                    self.readout_2.add(gluon.nn.Dense(self.hidden_size, in_units=self.hidden_size))
+                self.readout_final = gluon.nn.Dense(1, in_units=self.hidden_size)
 
     def compute_messages(self, F, hidden_states, edges, t):
         summed_msgs = []

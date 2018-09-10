@@ -1,4 +1,5 @@
 # Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+from experiments import aws_config
 from experiments.evaluate_models_for_experiment import evaluate_models_for_experiment
 from experiments.run_command_on_remote import run_command_on_remote
 
@@ -13,7 +14,7 @@ if __name__ == '__main__':
              dataset_name='18_popular_mavens',
              experiment_name='VarNaming_subtoken_edge_ablation',
              experiment_run_log_id=experiment_run_log_id,
-             model_name='VarNamingFixedVocabGGNN',
+             model_name='VarNamingNameGraphVocabGGNN',
              model_label='all_edge_except_subtoken',
              n_workers=8,
              n_batch=250 * 4,
