@@ -21,7 +21,7 @@ if __name__ == '__main__':
              evaluation_metrics=('evaluate_full_name_accuracy',
                                  'evaluate_subtokenwise_accuracy',
                                  'evaluate_edit_distance'),
-             model_params_to_load='best.params',
+             model_params_to_load='model_checkpoint_epoch_23.params',
              skip_s3_sync=skip_s3_sync,
              test=test),
         dict(seed=5145,
@@ -36,7 +36,7 @@ if __name__ == '__main__':
              evaluation_metrics=('evaluate_full_name_accuracy',
                                  'evaluate_subtokenwise_accuracy',
                                  'evaluate_edit_distance'),
-             model_params_to_load='best.params',
+             model_params_to_load='model_checkpoint_epoch_36.params',
              skip_s3_sync=skip_s3_sync,
              test=test),
     ]
